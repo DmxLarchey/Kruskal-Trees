@@ -19,9 +19,10 @@ trees.
 
 It is was extracted from a complete rework of the proof of Kruskal's
 tree theorem based on dependent vectors instead of lists, but can be
-used independently, as requested by @jjhughes.
+used independently under the [_CeCILL-B free software license_](http://www.cecill.info/licences.en.html) 
+(compatible with BSD), as requested by eg [@jjhughes](https://github.com/jjhugues).
 
-This `README` file provides an introduction to the main definitions.
+This `README` file provides a simple introduction to the main definitions.
 
 # Overview of the definitions 
 
