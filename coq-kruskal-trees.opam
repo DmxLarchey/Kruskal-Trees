@@ -11,7 +11,7 @@ license: "CeCILL-B"
 homepage: "https://github.com/DmxLarchey/Kruskal-Trees"
 bug-reports: "https://github.com/DmxLarchey/Kruskal-Trees/issues"
 depends: [
-  "coq" {dev & >= "8.13"}
+  "coq" {dev & >= "8.14"}
 ]
 
 build: [make "-j%{jobs}%"]
