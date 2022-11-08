@@ -4,14 +4,14 @@ version: "1.0"
 synopsis: "Coq library for manipulating rose trees (ie finitely branching) as used in proof of Kruskal's tree theorem"
 description:
   "Several implementations for roses trees are proposed with proper induction principles. Sons are collected into dependent vectors, 
-   vectors, lists, etc.}  
+   vectors, lists, etc."  
 maintainer: ["Dominique Larchey-Wendling"]
 authors: ["Dominique Larchey-Wendling"]
-license: "CeCILL B"
+license: "CeCILL-B"
 homepage: "https://github.com/DmxLarchey/Kruskal-Trees"
 bug-reports: "https://github.com/DmxLarchey/Kruskal-Trees/issues"
 depends: [
-  "coq" {dev & >= "8.14"}
+  "coq" {dev & >= "8.13"}
 ]
 
 build: [make "-j%{jobs}%"]
