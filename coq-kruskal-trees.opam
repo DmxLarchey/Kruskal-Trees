@@ -21,7 +21,9 @@ install: [
 ]
 
 depends: [
-  "coq" {dev & >= "8.14"}
+  "ocaml"
+  "ocamlfind"
+  "coq" {>= "8.14" & < "8.17~" }
 ]
 
 #url { git: "https://github.com/DmxLarchey/Kruskal-Trees.git" }
