@@ -9,14 +9,19 @@ description: """
 maintainer: ["Dominique Larchey-Wendling (https://github.com/DmxLarchey)" "Jerome Hugues (https://github.com/jjhugues)"] 
 authors: "Dominique Larchey-Wendling (https://github.com/DmxLarchey)"
 license: "CeCILL-B"
-homepage: "https://github.com/DmxLarchey/Kruskal-Trees"
+homepage: "https://github.com/DmxLarchey/Kruskal-Trees/"
 bug-reports: "https://github.com/DmxLarchey/Kruskal-Trees/issues"
-dev-repo: "git+https://github.com:DmxLarchey/Kruskal-Trees.git"
+dev-repo: "git+https://github.com:DmxLarchey/Kruskal-Trees/"
+
+build: [
+  [ make "-j%{jobs}%"]
+]
+install: [
+  [make "install"]
+]
 
 depends: [
   "coq" {dev & >= "8.14"}
 ]
 
-build: [make "-j%{jobs}%"]
-run-test: [make "-j%{jobs}%" "test"]
-install: [make "install"]
+#url { git: "https://github.com/DmxLarchey/Kruskal-Trees.git" }
