@@ -56,3 +56,12 @@ Section vtree.
   End wft_rect.
 
 End vtree.
+
+Section vtree_eq_dec.
+
+  Variables (X : Type) (eqX_dec : forall x y : X, { x = y } + { x <> y }).
+
+  Theorem vtree_eq_dec (r t : vtree X) : { r = t } + { r <> t }.
+  Proof. apply dtree_eq_dec; auto. Qed.
+
+End vtree_eq_dec.
