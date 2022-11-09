@@ -17,7 +17,13 @@ Import ListNotations.
 
 Set Implicit Arguments.
 
-#[global] Notation Forall_cons_inv := Forall_cons_iff.
+Fact Forall_cons_inv X (P : X -> Prop) (x : X) l : 
+       Forall P (x::l) <-> P x /\ Forall P l.
+Proof.
+  split.
+  + inversion 1; eauto.
+  + constructor; tauto.
+Qed.
 
 Arguments Forall2_nil {_ _ _}.
 Arguments Forall2_cons {_ _ _ _ _ _ _}.
