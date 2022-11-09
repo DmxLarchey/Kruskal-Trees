@@ -8,7 +8,7 @@
 (**************************************************************)
 
 From Coq
- Require Import Lia.
+ Require Import Arith Lia.
 
 From KruskalTrees
   Require Import notations tactics idx vec.
@@ -194,3 +194,20 @@ Tactic Notation "dtree" "inj" hyp(H) :=
   let e := fresh
   in  apply dtree_cons_inj in H as (e & H); eq refl;
       destruct H as [ H <- ]; try clear e.
+
+Section dtree_eq_dec.
+
+  Variable (X : nat -> Type) (eqX_dec : forall n (x y : X n), { x = y } + { x <> y }).
+
+  Theorem dtree_eq_dec (r t : dtree X) : { r = t } + { r <> t }.
+  Proof.
+    revert t; induction r as [ n x v IHv ]; intros [ m y w ].
+    destruct (eq_nat_dec n m) as [ <- | C ].
+    2: now right; contradict C; dtree inj C.
+    destruct (eqX_dec x y) as [ <- | C ].
+    2: now right; contradict C; dtree inj C.
+    destruct (vec_eq_dec_ext v w) as [ <- | C ]; auto.
+    now right; contradict C; dtree inj C.
+  Qed.
+
+End dtree_eq_dec.

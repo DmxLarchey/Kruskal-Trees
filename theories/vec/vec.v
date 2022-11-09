@@ -409,6 +409,20 @@ End vec_notations.
 
 Import vec_notations.
 
+Theorem vec_eq_dec_ext X n (u v : vec X n) :
+       (forall i, { u⦃i⦄ = v⦃i⦄ } + { u⦃i⦄ <> v⦃i⦄ })
+    -> { u = v } + { u <> v }.
+Proof.
+  induction u as [ | x n u IH ] in v |- *.
+  + vec invert v; eauto.
+  + vec invert v as y v; intros H.
+    destruct (H 𝕆) as [ C | C ]; simpl in C; subst.
+    2: now right; contradict C; apply vec_cons_inj in C.
+    specialize (fun i => H (𝕊 i)); simpl in H.
+    apply IH in H as [ <- | C ]; auto.
+    now right; contradict C; apply vec_cons_inj in C.
+Qed.
+
 Definition lvec_map {X Y} f v := match v with ⦑n,v⦒ => ⦑n,@vec_map X Y f n v⦒ end.
 
 Section vec_reif.
