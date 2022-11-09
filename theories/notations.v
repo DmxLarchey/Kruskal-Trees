@@ -8,7 +8,7 @@
 (**************************************************************)
 
 From Coq
-  Require Import Arith List.
+  Require Import Arith Lia List.
 
 (** For lists *)
 
@@ -28,14 +28,16 @@ Arguments app {_}.
 
 #[global] Notation "Q '∘' P" := (fun x z => exists y, P x y /\ Q y z) (at level 1, left associativity, format "Q ∘ P").
 
-#[global] Notation plus_assoc := Nat.add_assoc.
-#[global] Notation le_plus_l := Nat.le_add_l.
-#[global] Notation le_plus_r := Nat.le_add_r.
-
-#[global] Notation le_trans := Nat.le_trans.
-#[global] Notation lt_le_trans := Nat.lt_le_trans.
-#[global] Notation lt_0_Sn := Nat.lt_0_succ.
-#[global] Notation lt_n_S := (fun n m => proj1 (Nat.succ_lt_mono n m)).
-#[global] Notation lt_S_n := (fun n m => proj2 (Nat.succ_lt_mono n m)).
+(** We use lia to avoid incompatibilities between Coq <= 8.15.2 and Coq >= 8.16 
+    DLW: I know this is a like a tank to crush a fly but it is more compatible
+         than the other options *)
+Definition plus_assoc n m p : n + (m + p) = n + m + p.      Proof. lia. Qed.
+Definition le_plus_l n m : n <= n + m.                      Proof. lia. Qed.
+Definition le_plus_r n m : m <= n + m.                      Proof. lia. Qed.
+Definition le_trans n m p : n <= m -> m <= p -> n <= p.     Proof. lia. Qed.
+Definition lt_le_trans n m p : n <= m -> m <= p -> n <= p.  Proof. lia. Qed.
+Definition lt_0_Sn n : 0 < S n.                             Proof. lia. Qed.
+Definition lt_n_S n m : n < m -> S n < S m.                 Proof. lia. Qed.
+Definition lt_S_n n m : S n < S m -> n < m.                 Proof. lia. Qed.
 
 
