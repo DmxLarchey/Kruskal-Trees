@@ -20,3 +20,5 @@ tree/dtree.v
 tree/vtree.v
 tree/utree.v
 tree/btree.v
+
+examples/rtree_lex.v
