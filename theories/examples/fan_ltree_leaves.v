@@ -27,7 +27,7 @@ Proof.
   + now intros (-> & ->). 
 Qed.
 
-Fact Forall2_right_Forall X Y (P : Y -> Prop) (l : list X) m : 
+Fact Forall2_right_Forall X Y (P : Y → Prop) (l : list X) m : 
      Forall2 (λ _ y, P y) l m ↔ ⌊l⌋ = ⌊m⌋ ∧ Forall P m.
 Proof.
   split.
