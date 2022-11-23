@@ -8,7 +8,7 @@
 (**************************************************************)
 
 From Coq
-  Require Import Arith List Lia.
+  Require Import List Utf8.
 
 From KruskalTrees
   Require Import notations tactics list_utils ltree.
@@ -17,18 +17,18 @@ Import ListNotations ltree_notations.
 
 Set Implicit Arguments.
 
-Definition list_is_nil {X} (l : list X) : { l = [] } + { l <> [] }.
+Definition list_is_nil {X} (l : list X) : { l = [] } + { l ≠ [] }.
 Proof. now destruct l; [ left | right ]. Qed.
 
-Fact list_cons_inj {X} (x : X) l y m : x::l = y::m <-> x = y /\ l = m.
+Fact list_cons_inj {X} (x : X) l y m : x::l = y::m ↔ x = y /\ l = m.
 Proof. 
   split. 
   + now inversion 1.
   + now intros (-> & ->). 
 Qed.
 
-Fact Forall2_right_Forall X Y (P : Y -> Prop) l m : 
-        Forall2 (fun (_ : X) y => P y) l m <-> length l = length m /\ Forall P m.
+Fact Forall2_right_Forall X Y (P : Y -> Prop) (l : list X) m : 
+     Forall2 (λ _ y, P y) l m ↔ ⌊l⌋ = ⌊m⌋ ∧ Forall P m.
 Proof.
   split.
   + split.
@@ -46,12 +46,14 @@ Arguments ltree_sons {_}.
 
 Section filter.
 
-  Context {X : Type} (f : X -> list (ltree X) -> bool).
+  Context {X : Type} (b : X → list (ltree X) → bool).
 
+  (* The list of nodes of a ltree X in prefix order, filtered by 
+     the Boolean test b *)
   Fixpoint ltree_filter (t : ltree X) : list X :=
     match t with
       | ⟨x|l⟩ₗ => let m := flat_map ltree_filter l
-                  in if f x l then x :: m else m
+                  in if b x l then x :: m else m
     end.
 
 End filter.
@@ -61,18 +63,20 @@ Section leaves_nodes.
   Context {X : Type}.
 
   Let f (_ : X) (l : list (ltree X)) := match l with [] => true | _ => false end.
-  Let g (x : X) (_ : list (ltree X)) := true.
 
-  (* This collects the leaves in a tree *)
+  (* This collects the leaves in a tree, left to right *)
   Definition ltree_leaves := ltree_filter f.
 
   Fact ltree_leaves_nil x : ltree_leaves ⟨x|[]⟩ₗ = [x].
   Proof. reflexivity. Qed.
   
   Fact ltree_leaves_not_nil x l : 
-      l <> [] -> ltree_leaves ⟨x|l⟩ₗ = flat_map ltree_leaves l.
+      l ≠ [] → ltree_leaves ⟨x|l⟩ₗ = flat_map ltree_leaves l.
   Proof. simpl; unfold f; now destruct l. Qed.
 
+  Let g (x : X) (_ : list (ltree X)) := true.
+
+  (* This collects all the nodes in a tree, prefix order *)
   Definition ltree_nodes := ltree_filter g.
 
   Fact ltree_nodes_fix x l : ltree_nodes ⟨x|l⟩ₗ = x :: flat_map ltree_nodes l.
@@ -87,28 +91,55 @@ End leaves_nodes.
 
 Section build_fan.
 
-  Variables (X : Type) 
-            (*R : X -> X -> Prop*) 
-            (* Rwf : well_founded R *) 
-            (f : X -> list X)
-            (*f_R : forall x y, y ∈ f x -> R y x*)
-            .
+  (** Below f : X → list X described a finitary FAN
+      which generates a process of (eg reduction). This
+      process terminates for the nodes x which
+      are accessible for the relation R := λ u v, u ∈ f v
 
-  Definition fan := ltree_fall (fun x l => f x = map ltree_node l).
+      a) on those nodes we compute the a rose-tree in ltree X
+         collecting all the reduction process upto irreducibles
+         (ie f x = [])
+      b) then we collect the leaves of this ltree X to
+         get the list of irreducibles.
+
+      c) assuming R is well founded, we define
+         the list of all irreducible values generated
+         by the reduction of x as irred x
+      d) we characterize irred with the fixpoint equations:
+         - f x = [] → irred x = [x]
+         - f x ≠ [] → irred x = flat_map irred (f x). *)
+
+  Variables (X : Type) (f : X → list X).
+
+  Let R := λ u v, u ∈ f v.
+
+  Definition fan := ltree_fall (λ x l, f x = map ltree_node l).
 
   (* A fan for f is a ltree X such that at every node ⟨x|l⟩ₗ 
      the list of label of each son (ie map ltree_node l) is
      exactly f x *) 
   Fact fan_fix x l : 
-       fan ⟨x|l⟩ₗ <-> f x = map ltree_node l /\ Forall fan l.
+       fan ⟨x|l⟩ₗ ↔ f x = map ltree_node l ∧ Forall fan l.
   Proof. unfold fan at 1; rewrite ltree_fall_fix, Forall_forall; split; auto. Qed.
 
-  Let R y x := y ∈ f x.
+  Fact fan_spec_nil t : fan t → f (ltree_node t) = [] → ltree_leaves t = [ltree_node t].
+  Proof.
+    induction 1 as [ x l Hx Hl _ ] using ltree_fall_rect; intros H.
+    simpl in H; rewrite Hx in H; destruct l; easy.
+  Qed.
+
+  Fact fan_spec_not_nil t : fan t → f (ltree_node t) ≠ [] → ltree_leaves t = flat_map ltree_leaves (ltree_sons t).
+  Proof.
+    induction 1 as [ x l Hx Hl _ ] using ltree_fall_rect; intros H.
+    destruct (list_is_nil l) as [ -> | Hl' ].
+    1: exfalso; apply H; auto.
+    simpl in H.
+    rewrite ltree_leaves_not_nil; auto.
+  Qed.
 
   (* Notice that a fan may not exists, but if it exists, all its nodes are in (Acc R) *)
-  Fact fan_Acc t : fan t -> forall x, x ∈ ltree_nodes t -> Acc R x.
+  Fact fan_Acc t : fan t → ∀ x, x ∈ ltree_nodes t → Acc R x.
   Proof.
-    unfold fan.
     induction 1 as [ x l Hx Hl IH ] using ltree_fall_rect; simpl; intros y Hy.
     destruct Hy as [ <- | Hy ].
     + constructor; intros y Hyx; red in Hyx.
@@ -120,7 +151,7 @@ Section build_fan.
   Qed.
 
   (* The fan is a unique characterization *)
-  Fact fan_uniq t1 t2 : fan t1 -> fan t2 -> ltree_node t1 = ltree_node t2 -> t1 = t2.
+  Fact fan_uniq t1 t2 : fan t1 → fan t2 → ltree_node t1 = ltree_node t2 → t1 = t2.
   Proof.
     intros H1 H2; revert H1 t2 H2.
     induction 1 as [ x l1 Hx Hl1 IH ] using ltree_fall_rect; intros [ y l2 ].
@@ -135,14 +166,10 @@ Section build_fan.
   Qed.
 
   (* A fan at x is a fan with root node labeled by x *)
-  Definition fan_at x (t : ltree X) := ltree_node t = x /\ fan t.
-
-  (* It is necessary for x to be accessible for a fan_at x to exist *)
-  Fact fan_at_Acc x : ex (fan_at x) -> Acc R x.
-  Proof. intros (t & <- & ?); apply fan_Acc with t; auto. Qed.
+  Definition fan_at x t := ltree_node t = x ∧ fan t.
 
   (* The fan_at x is unique *)
-  Fact fan_at_uniq x t1 t2 : fan_at x t1 -> fan_at x t2 -> t1 = t2.
+  Fact fan_at_uniq x t1 t2 : fan_at x t1 → fan_at x t2 → t1 = t2.
   Proof.
     intros (H1 & H2) (<- & H4).
     revert H2 H4 H1; apply fan_uniq.
@@ -153,7 +180,7 @@ Section build_fan.
 
      We build the fan_at by Acc_rect induction, knowing that
      f x contains only R-smaller values (this is f_R) *)
-  Theorem build_fan_at : forall x, Acc R x -> { t | fan_at x t }.
+  Theorem build_fan_at x : Acc R x → { t | fan_at x t }.
   Proof.
     induction 1 as [ x _ IHx ] using Acc_rect.
     apply forall_sig_Forall2 in IHx as (m & Hm).
@@ -168,46 +195,53 @@ Section build_fan.
       * apply Forall2_right_Forall in H2; tauto.
   Qed.
 
-
-  Fact fan_prop t : 
-         fan t 
-      -> match t with 
-           | ⟨x|l⟩ₗ => (f x = []  -> ltree_leaves t = [x])
-                    /\ (f x <> [] -> ltree_leaves t = flat_map ltree_leaves l)
-         end.
-  Proof. Admitted.
-
-  Definition irred x := ltree_leaves (proj1_sig (build_fan_at x)).
-
-  Theorem irred_fix_nil x : f x = [] -> irred x = [x].
+  (* A fan_at x exists iff x is R-accessible *)
+  Corollary fan_at_iff x : ex (fan_at x) ↔ Acc R x.
   Proof.
-    unfold irred.
-    destruct (build_fan_at x) as (t & Ht); simpl.
-    destruct t as (y & l).
-    destruct Ht as (H1 & H2); simpl in H1; subst y.
-    apply fan_fix in H2 as (H2 & H3).
-    intros E; rewrite E in H2.
-    now destruct l.
+    split.
+    + intros (t & <- & ?); apply fan_Acc with t; auto. 
+    + intros Hx; destruct (build_fan_at Hx); eauto.
   Qed.
 
-  Theorem irred_fix_not_nil x : f x <> [] -> irred x = flat_map irred (f x).
+  (* Now we assume R is well-founded so a fan can always be computed *)
+  Hypothesis hf : well_founded R.
+
+  Let FAN x : sig (fan_at x).
+  Proof. apply build_fan_at, hf. Qed.
+
+  (* The irreductible elements generated by x as collected
+     in the leaves of a fan_at x *)
+  Definition irred x := ltree_leaves (proj1_sig (FAN x)).
+
+  Lemma irred_nil x : f x = [] → irred x = [x].
+  Proof.
+    unfold irred.
+    destruct (FAN x) as (t & <- & H2); simpl.
+    now apply fan_spec_nil.
+  Qed.
+
+  Lemma irred_not_nil x : f x ≠ [] → irred x = flat_map irred (f x).
   Proof.
     unfold irred at 1.
-    destruct (build_fan_at x) as (t & Ht); simpl; intros D.
-    destruct t as (y & l).
-    destruct Ht as (H1 & H2); simpl in H1; subst y.
-    apply fan_fix in H2 as (H2 & H3).
-    assert (l <> []) as Hl by now destruct l.
-    rewrite ltree_leaves_not_nil; auto.
-    rewrite H2.
-    rewrite !flat_map_concat_map, map_map.
+    destruct (FAN x) as (t & <- & H2); simpl; intros H.
+    rewrite fan_spec_not_nil, !flat_map_concat_map; auto.
     f_equal.
-    apply map_ext_in_iff, Forall_forall.
-    clear x H2 D Hl; revert H3.
-    induction 1 as [ | x l Hx Hl IHl ]; constructor; auto.
-  Admitted.
+    destruct t as [ x l ]; simpl in H |- *.
+    apply fan_fix in H2 as (-> & H2).
+    rewrite Forall_forall in H2.
+    rewrite map_map.
+    apply map_ext_in_iff.
+    unfold irred.
+    intros t Ht.
+    destruct (FAN (ltree_node t)) as (t' & H'); simpl.
+    f_equal.
+    apply fan_at_uniq with (ltree_node t); auto.
+    split; auto.
+  Qed.
 
 End build_fan.
 
-Check irred_fix_not_nil.
+Check irred.
+Check irred_nil.
+Check irred_not_nil.
 

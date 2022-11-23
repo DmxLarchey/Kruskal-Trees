@@ -22,4 +22,4 @@ tree/utree.v
 tree/btree.v
 
 examples/rtree_lex.v
-examples/ltree_leaves.v
+examples/fan_ltree_leaves.v
