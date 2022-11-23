@@ -19,7 +19,7 @@ Set Implicit Arguments.
 
 Section filter.
 
-  Variables (X : Type) (f : X -> list (ltree X) -> bool).
+  Context {X : Type} (f : X -> list (ltree X) -> bool).
 
   Fixpoint ltree_filter (t : ltree X) : list X :=
     match t with
@@ -31,7 +31,7 @@ End filter.
 
 Section leaves.
 
-  Variables (X : Type).
+  Context {X : Type}.
 
   Let f (_ : X) (l : list (ltree X)) := match l with [] => true | _ => false end.
 
@@ -47,7 +47,6 @@ Section leaves.
 
 End leaves.
 
-Arguments ltree_leaves {_}.
 Arguments ltree_node {_}.
 
 Definition list_is_nil {X} (l : list X) : { l = [] } + { l <> [] }.
@@ -63,6 +62,13 @@ Proof.
   + intros (H1 & H2); revert H2 l H1.
     induction 1 as [ | y m IH ]; intros [ | x l ]; try easy; simpl; intros H.
     constructor; auto.
+Qed.
+
+Fact list_cons_inj {X} (x : X) l y m : x::l = y::m <-> x = y /\ l = m.
+Proof. 
+  split. 
+  + now inversion 1.
+  + now intros (-> & ->). 
 Qed.
 
 Section build_fan.
@@ -82,8 +88,36 @@ Section build_fan.
        fan ⟨x|l⟩ₗ <-> f x = map ltree_node l /\ Forall fan l.
   Proof. unfold fan at 1; rewrite ltree_fall_fix, Forall_forall; split; auto. Qed.
 
+  (* The fan is a unique characterization, by wf induction on the root *)
+  Fact fan_uniq x t1 t2 : fan t1 -> fan t2 -> ltree_node t1 = x -> ltree_node t2 = x -> t1 = t2.
+  Proof.
+    revert t1 t2;
+    induction x as [ x IHx ] using (well_founded_induction_type Rwf); intros [ x1 l1 ] [ x2 l2 ].
+    rewrite !fan_fix; intros [H1 H2] [H3 H4]; simpl; intros -> ->; f_equal.
+    assert (IH : forall y, y ∈ f x 
+         -> forall t1 t2, fan t1 -> fan t2 -> ltree_node t1 = y -> ltree_node t2 = y -> t1 = t2).
+    1:{ intros y Hy; apply IHx; eauto. }
+    clear IHx.
+    revert l1 l2 H1 H3 H2 H4 IH; generalize (f x); clear x; intro l.
+    induction l as [ | x l IHl ].
+    + now intros [] [].
+    + intros [ | t1 l1 ] [ | t2 l2 ]; try easy; simpl.
+      rewrite !list_cons_inj, !Forall_cons_iff.
+      intros (H1 & H2) (H3 & H4) (H5 & H6) (H7 & H8) H9.
+      specialize (IHl _ _ H2 H4 H6 H8).
+      split.
+      * apply H9 with x; auto.
+      * apply IHl; eauto.
+  Qed.
+
   (* A fan at x is a fan with root node labeled by x *)
-  Definition fan_at x (t : ltree X) := ltree_node t = x /\ fan t. 
+  Definition fan_at x (t : ltree X) := ltree_node t = x /\ fan t.
+
+  Fact fan_at_uniq x t1 t2 : fan_at x t1 -> fan_at x t2 -> t1 = t2.
+  Proof.
+    intros (H1 & H2) (H3 & H4).
+    revert H2 H4 H1 H3; apply fan_uniq.
+  Qed.
 
   (* We build a fan by well-founded induction, know that
      f x contains only R-smaller values (this is f_R) *)
