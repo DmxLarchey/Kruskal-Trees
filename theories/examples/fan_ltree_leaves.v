@@ -4,7 +4,7 @@
 (*                             [*] Affiliation LORIA -- CNRS  *)
 (**************************************************************)
 (*      This file is distributed under the terms of the       *)
-(*         CeCILL B FREE SOFTWARE LICENSE AGREEMENT           *)
+(*         CeCILL FREE SOFTWARE LICENSE AGREEMENT             *)
 (**************************************************************)
 
 From Coq
