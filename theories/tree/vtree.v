@@ -32,8 +32,10 @@ Section vtree.
 
   Implicit Types (X Y : nat -> A -> Prop).
 
-  (** A predicate for well-formed vtrees: nodes of arity i satisfy X i *)
-  Definition wft X : vtree A -> Prop := dtree_fall (fun n x _ => X n x). (* X n x := n = a x *)
+  (** A predicate for well-formed vtrees: nodes of arity i satisfy X i 
+      For instance, given a : X -> nat, then a x gives the unique arity 
+      allowed for x, one could use X n x := n = a x *)
+  Definition wft X : vtree A -> Prop := dtree_fall (fun n x _ => X n x).
 
   Fact wft_fix X n x (v : vec _ n) : wft X ⟨x|v⟩ <-> X n x /\ forall p, wft X v⦃p⦄.
   Proof. unfold wft at 1; rewrite dtree_fall_fix; apply and_equiv; tauto. Qed.
