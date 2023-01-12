@@ -48,10 +48,25 @@ Section ltree.
 
     Let is_subtree s t := s ∈ ltree_sons t.
 
+    (* Same proof as below, but ltac style *)
+    Local Fact is_subtree_wf_ltac : well_founded is_subtree.
+    Proof.
+      refine (fix is_subtree_wf_ltac t { struct t } := _).
+      constructor; destruct t as [ x l ].
+      cbn; clear x. 
+      intros s Hs.
+      induction l as [ | r l IHl ].
+      + destruct Hs.                (* match Hs with end *)
+      + destruct Hs as [ e | Hs ].  (* match Hs with or_intro ... end *)
+        * (* Beware calling is_subtree_wf_ltac on r, sub-term of l, NOT on s *)
+          subst s.                  (* match e with eq_refl => ... end *)
+          exact (is_subtree_wf_ltac r).
+        * exact (IHl Hs).           (* sons_wf _ _ Hs *)
+    Qed.
+
     (** The is_subtree relation is well_founded.
         The proof critically uses a nested fixpoint *)
-
-   Let is_subtree_wf : well_founded is_subtree :=
+    Let is_subtree_wf : well_founded is_subtree :=
       fix is_subtree_wf t : Acc is_subtree t :=
         Acc_intro t ((fix sons_wf l :=
           match l return forall r, r ∈ l -> _ with
@@ -62,22 +77,6 @@ Section ltree.
               | or_intror Hs   => sons_wf _ _ Hs
             end
           end) (ltree_sons t)).
-
-    (* Same proof, ltac style *)
-    Local Fact is_subtree_wf_ltac : well_founded is_subtree.
-    Proof.
-      refine (fix is_subtree_wf_ltac t { struct t } := _).
-      constructor; destruct t as [ x l ].
-      cbn; clear x. 
-      intros s Hs.
-      induction l as [ | r l IHl ].
-      + destruct Hs.                (* match Hs with end *)
-      + destruct Hs as [ e | Hs ].  (* match Hs with or_intro ... end *)
-        * (* Beware calling is_subtree_wf on r, sub-term of l, not on s *)
-          subst s.                  (* match e with eq_refl => ... end *)
-          exact (is_subtree_wf r).
-        * exact (IHl Hs).           (* sons_wf _ _ Hs *)
-    Qed.
 
     Variable (P : ltree -> Type)
              (HP : forall x l, (forall t, t ∈ l -> P t) -> P ⟨x|l⟩ₗ).
