@@ -71,6 +71,30 @@ Defined.
 Fact rtree_size_fix l : rtree_size ⟨l⟩ᵣ = 1+list_sum rtree_size l.
 Proof. induction l; simpl; f_equal; auto. Qed.
 
+Section rtree_recursion.
+
+  (** A non-dependent recursor for trees, using a direct nested fixpoint,
+      the nesting occurs with the external (list) map function *)
+
+  Variable (Y : Type) (f : list rtree -> list Y -> Y).
+
+  Fixpoint rtree_recursion (t : rtree) : Y :=
+    match t with
+      | ⟨l⟩ᵣ => f l (map rtree_recursion l)
+    end.
+
+End rtree_recursion.
+
+Definition rtree_size_alt (r : rtree) : nat.
+Proof.
+  induction r as [ _ ls ] using rtree_recursion.
+  exact (1+list_sum (fun x => x) ls).
+Defined.
+
+Fact rtree_size_alt_fix l :
+      rtree_size_alt ⟨l⟩ᵣ = 1+list_sum (fun x => x) (map rtree_size_alt l).
+Proof. reflexivity. Qed.
+
 Module rtree_notations.
 
   Notation "⟨ l ⟩ᵣ" := (rt l).
