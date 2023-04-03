@@ -30,7 +30,9 @@ Set Elimination Schemes.
 
 Section rtree_rect.
 
-  Let ist_wf : well_founded (fun s t => match t with ⟨l⟩ᵣ => s ∈ l end).
+  Let is_subtree s t := s ∈ match t with ⟨l⟩ᵣ => l end.
+  
+  Let ist_wf : well_founded is_subtree.
   Proof.
     refine (fix loop t := _).
     destruct t as [ l ].
@@ -45,14 +47,36 @@ Section rtree_rect.
   Variables (P : rtree -> Type)
             (HP : forall l, (forall t, t ∈ l -> P t) -> P ⟨l⟩ᵣ).
 
-  Theorem rtree_rect t : P t.
-  Proof.
-    generalize (ist_wf t); revert t.
-    refine (fix loop t d { struct d } := _).
-    destruct t as [ l ]; apply HP.
-    intros s Hs; apply loop.
-    apply Acc_inv with (1 := d), Hs.
-  Qed.
+  Let Fixpoint rtree_Acc_rect t (a : Acc is_subtree t) : P t :=
+    match t return Acc is_subtree t -> P t with
+      | ⟨l⟩ᵣ => fun a => HP _ (fun _ h => rtree_Acc_rect (Acc_inv a h))
+    end a.
+
+  Arguments rtree_Acc_rect : clear implicits.
+
+  Definition rtree_rect t : P t := rtree_Acc_rect t (ist_wf t).
+
+  Section rtree_rect_fix.
+
+    Hypothesis HP_ext : forall l f g, (forall x Hx, f x Hx = g x Hx) -> HP l f = HP l g.
+
+    (** The Acc based recursor is proof-irrelevant *)
+
+    Let Fixpoint rtree_Acc_rect_eq t a a' : rtree_Acc_rect t a = rtree_Acc_rect t a'.
+    Proof.
+      destruct a; destruct a'; destruct t; simpl.
+      apply HP_ext.
+      intros; apply rtree_Acc_rect_eq.
+    Qed.
+
+    Lemma rtree_rect_fix l : rtree_rect ⟨l⟩ᵣ = HP l (fun t _ => rtree_rect t).
+    Proof.
+      unfold rtree_rect; destruct (ist_wf ⟨l⟩ᵣ); simpl.
+      apply HP_ext.
+      intros; apply rtree_Acc_rect_eq.
+    Qed.
+
+  End rtree_rect_fix.
 
 End rtree_rect.
 
@@ -94,6 +118,29 @@ Defined.
 Fact rtree_size_alt_fix l :
       rtree_size_alt ⟨l⟩ᵣ = 1+list_sum (fun x => x) (map rtree_size_alt l).
 Proof. reflexivity. Qed.
+
+Fixpoint list_map_dep {X Y} l : (forall x : X, x ∈ l -> Y) -> list Y :=
+  match l with 
+    | nil  => fun _ => nil
+    | x::l => fun f => f _ (or_introl eq_refl) :: list_map_dep l (fun y hy => f y (or_intror hy))
+  end.
+
+Fact list_map_dep_ext {X Y} l f g : (forall x hx, f x hx = g x hx) -> @list_map_dep X Y l f = list_map_dep l g.
+Proof. revert f g; induction l; intros; simpl; f_equal; auto. Qed.
+
+Definition rtree_size_rec (r : rtree) : nat.
+Proof.
+  induction r as [ l IHl ] using rtree_rec.
+  exact (1+list_sum (fun x => x) (list_map_dep l IHl)).
+Defined.
+
+Fact rtree_size_rec_fix l : rtree_size_rec ⟨l⟩ᵣ = 1+list_sum (fun x => x) (list_map_dep l (fun t _ => rtree_size_rec t)).
+Proof.
+  unfold rtree_size_rec, rtree_rec.
+  rewrite rtree_rect_fix; trivial.
+  intros; do 2 f_equal.
+  now apply list_map_dep_ext.
+Qed.
 
 Module rtree_notations.
 
