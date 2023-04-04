@@ -128,18 +128,27 @@ Fixpoint list_map_dep {X Y} l : (forall x : X, x ∈ l -> Y) -> list Y :=
 Fact list_map_dep_ext {X Y} l f g : (forall x hx, f x hx = g x hx) -> @list_map_dep X Y l f = list_map_dep l g.
 Proof. revert f g; induction l; intros; simpl; f_equal; auto. Qed.
 
+Fixpoint list_sum_dep {X} l : (forall x : X, x ∈ l -> nat) -> nat :=
+  match l with 
+    | nil  => fun _ => 0
+    | x::l => fun f => f _ (or_introl eq_refl) + list_sum_dep l (fun y hy => f y (or_intror hy))
+  end.
+
+Fact list_sum_dep_ext {X} l f g : (forall x hx, f x hx = g x hx) -> @list_sum_dep X l f = list_sum_dep l g.
+Proof. revert f g; induction l; intros; simpl; f_equal; auto. Qed.
+
 Definition rtree_size_rec (r : rtree) : nat.
 Proof.
   induction r as [ l IHl ] using rtree_rec.
-  exact (1+list_sum (fun x => x) (list_map_dep l IHl)).
+  exact (1+list_sum_dep l IHl).
 Defined.
 
-Fact rtree_size_rec_fix l : rtree_size_rec ⟨l⟩ᵣ = 1+list_sum (fun x => x) (list_map_dep l (fun t _ => rtree_size_rec t)).
+Fact rtree_size_rec_fix l : rtree_size_rec ⟨l⟩ᵣ = 1+list_sum_dep l (fun t _ => rtree_size_rec t).
 Proof.
   unfold rtree_size_rec, rtree_rec.
   rewrite rtree_rect_fix; trivial.
-  intros; do 2 f_equal.
-  now apply list_map_dep_ext.
+  intros; f_equal.
+  now apply list_sum_dep_ext.
 Qed.
 
 Module rtree_notations.
