@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "Coq-Kruskal-Trees"
-version: "1.0"
+version: "1.1"
 synopsis: "Coq library for manipulating rose trees (ie finitely branching) as used in proof of Kruskal's tree theorem"
 description: """
    Several implementations for roses trees are proposed with proper induction principles. 
@@ -22,7 +22,7 @@ install: [
 
 depends: [
   "ocaml"
-  "coq" {dev & >= "8.14"}
+  "coq" {>= "8.14" & < "8.19~"}
 ]
 
 #url { git: "https://github.com/DmxLarchey/Kruskal-Trees.git" }
