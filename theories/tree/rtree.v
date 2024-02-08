@@ -28,19 +28,28 @@ Set Elimination Schemes.
 
 #[local] Notation "⟨ l ⟩ᵣ" := (rt l).
 
+Section rtree_ind.
+
+  Variables (P : rtree -> Prop)
+            (HP : forall l, (forall t, t ∈ l -> P t) -> P ⟨l⟩ᵣ).
+
+  Fixpoint rtree_ind t : P t.
+  Proof.
+    destruct t as [ l ].
+    apply HP.
+    induction l as [ | x l IHl ].
+    + intros ? [].
+    + intros ? [ <- | ].
+      * apply rtree_ind.
+      * now apply IHl.
+  Qed.
+
+End rtree_ind.
+
 Section rtree_rect.
 
-  Let ist_wf : well_founded (fun s t => match t with ⟨l⟩ᵣ => s ∈ l end).
-  Proof.
-    refine (fix loop t := _).
-    destruct t as [ l ].
-    constructor 1.
-    induction l as [ | s l IHl ].
-    + intros ? [].
-    + intros x [ <- | Hx ].
-      * apply loop.
-      * apply IHl, Hx.
-  Qed.
+  Local Fact ist_wf : well_founded (fun s t => match t with ⟨l⟩ᵣ => s ∈ l end).
+  Proof. intro t; induction t; now constructor. Qed.
 
   Variables (P : rtree -> Type)
             (HP : forall l, (forall t, t ∈ l -> P t) -> P ⟨l⟩ᵣ).
@@ -57,19 +66,15 @@ Section rtree_rect.
 End rtree_rect.
 
 Definition rtree_rec (P : _ -> Set) := @rtree_rect P.
-Definition rtree_ind (P : _ -> Prop) := @rtree_rect P.
+(* Definition rtree_ind (P : _ -> Prop) := @rtree_rect P. *)
 
-Fixpoint rtree_size (r : rtree) : nat.
-Proof.
-  destruct r as [ l ].
-  apply (plus 1).
-  induction l as [ | t l IHl ].
-  + exact 0.
-  + apply (rtree_size t + IHl).
-Defined.
+Fixpoint rtree_size (t : rtree) := 
+  match t with 
+  | ⟨l⟩ᵣ => 1+list_sum rtree_size l
+  end.
 
 Fact rtree_size_fix l : rtree_size ⟨l⟩ᵣ = 1+list_sum rtree_size l.
-Proof. induction l; simpl; f_equal; auto. Qed.
+Proof. reflexivity. Qed.
 
 Module rtree_notations.
 

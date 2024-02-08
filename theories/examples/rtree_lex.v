@@ -89,7 +89,7 @@ Section order.
 
   Section list_lex_irrefl.
 
-    Let list_lex_irrefl_rec l m : l <lex m → l = m → ∃x, x ∈ l ∧ R x x.
+    Local Fact list_lex_irrefl_rec l m : l <lex m → l = m → ∃x, x ∈ l ∧ R x x.
     Proof.
       induction 1 as [ x y l m H1 H2 | x l m H IH ].
       + inversion 1; subst; simpl; eauto.

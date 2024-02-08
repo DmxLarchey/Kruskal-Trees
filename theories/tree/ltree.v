@@ -42,41 +42,48 @@ Section ltree.
     + now apply f_equal with (f := ltree_sons) in H.
   Qed.
 
+  Section ltree_ind.
+
+    Variables (P : ltree -> Prop)
+              (HP : forall {x l}, (forall t, t ∈ l -> P t) -> P ⟨x|l⟩ₗ).
+
+    (** The proof critically uses a nested fixpoint *)
+    Fixpoint ltree_ind t : P t :=
+      (match t with 
+      | ⟨x|l⟩ₗ => HP 
+      ((fix loop l : forall r, r ∈ l -> _ :=
+          match l with
+          | []   => fun _ C => match C with end
+          | y::l => fun _ H =>
+            match H with
+            | or_introl E => match E with eq_refl => ltree_ind y end
+            | or_intror H => loop _ _ H
+            end
+          end) l)
+      end).
+
+    (** Same proof, ltac style *)
+    Fixpoint ltree_ind_ltac t : P t.
+    Proof.
+      destruct t as [ x l ].
+      apply HP.
+      induction l as [ | y l IHl ].
+      + intros ? [].
+      + intros ? [ <- | ].
+        * apply ltree_ind_ltac.
+        * now apply IHl.
+    Qed.
+
+  End ltree_ind.
+
   Section ltree_rect.
 
     (** The subtree relations between nodes and their sons *)
 
     Let is_subtree s t := s ∈ ltree_sons t.
 
-    (* Same proof as below, but ltac style *)
-    Local Fact is_subtree_wf_ltac : well_founded is_subtree.
-    Proof.
-      refine (fix is_subtree_wf_ltac t { struct t } := _).
-      constructor; destruct t as [ x l ].
-      cbn; clear x. 
-      intros s Hs.
-      induction l as [ | r l IHl ].
-      + destruct Hs.                (* match Hs with end *)
-      + destruct Hs as [ e | Hs ].  (* match Hs with or_intro ... end *)
-        * (* Beware calling is_subtree_wf_ltac on r, sub-term of l, NOT on s *)
-          subst s.                  (* match e with eq_refl => ... end *)
-          exact (is_subtree_wf_ltac r).
-        * exact (IHl Hs).           (* sons_wf _ _ Hs *)
-    Qed.
-
-    (** The is_subtree relation is well_founded.
-        The proof critically uses a nested fixpoint *)
-    Let is_subtree_wf : well_founded is_subtree :=
-      fix is_subtree_wf t : Acc is_subtree t :=
-        Acc_intro t ((fix sons_wf l :=
-          match l return forall r, r ∈ l -> _ with
-            | []   => fun _ Hs => match Hs with end
-            | r::l => fun s Hs =>
-            match Hs with
-              | or_introl e    => match e with eq_refl => is_subtree_wf r end
-              | or_intror Hs   => sons_wf _ _ Hs
-            end
-          end) (ltree_sons t)).
+    Local Fact is_subtree_wf : well_founded is_subtree.
+    Proof. intro t; induction t; constructor; auto. Qed.
 
     Variable (P : ltree -> Type)
              (HP : forall x l, (forall t, t ∈ l -> P t) -> P ⟨x|l⟩ₗ).
@@ -100,7 +107,7 @@ Section ltree.
 
       (** The Acc based recursor is proof-irrelevant *)
 
-      Let Fixpoint ltree_Acc_rect_eq t a a' : ltree_Acc_rect t a = ltree_Acc_rect t a'.
+      Local Fixpoint ltree_Acc_rect_eq t a a' : ltree_Acc_rect t a = ltree_Acc_rect t a'.
       Proof.
         destruct a; destruct a'; destruct t; simpl.
         apply HP_ext.
@@ -121,7 +128,6 @@ Section ltree.
   End ltree_rect.
 
   Definition ltree_rec (P : _ -> Set) := ltree_rect P.
-  Definition ltree_ind (P : _ -> Prop) := ltree_rect P.
 
   Section ltree_eq_dec.
 
