@@ -30,7 +30,7 @@ Set Elimination Schemes.
 
 Section rtree_rect.
 
-  Let ist_wf : well_founded (fun s t => match t with ⟨l⟩ᵣ => s ∈ l end).
+  Local Lemma ist_wf : well_founded (fun s t => match t with ⟨l⟩ᵣ => s ∈ l end).
   Proof.
     refine (fix loop t := _).
     destruct t as [ l ].

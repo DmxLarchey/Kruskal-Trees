@@ -100,7 +100,7 @@ Section ltree.
 
       (** The Acc based recursor is proof-irrelevant *)
 
-      Let Fixpoint ltree_Acc_rect_eq t a a' : ltree_Acc_rect t a = ltree_Acc_rect t a'.
+      Local Fixpoint ltree_Acc_rect_eq t a a' : ltree_Acc_rect t a = ltree_Acc_rect t a'.
       Proof.
         destruct a; destruct a'; destruct t; simpl.
         apply HP_ext.
