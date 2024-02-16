@@ -4,7 +4,7 @@
 (*                             [*] Affiliation LORIA -- CNRS  *)
 (**************************************************************)
 (*      This file is distributed under the terms of the       *)
-(*         CeCILL B FREE SOFTWARE LICENSE AGREEMENT           *)
+(*        Mozilla Public License Version 2.0, MPL-2.0         *)
 (**************************************************************)
 
 From Coq
@@ -30,7 +30,7 @@ Set Elimination Schemes.
 
 Section rtree_rect.
 
-  Let ist_wf : well_founded (fun s t => match t with ⟨l⟩ᵣ => s ∈ l end).
+  Local Lemma ist_wf : well_founded (fun s t => match t with ⟨l⟩ᵣ => s ∈ l end).
   Proof.
     refine (fix loop t := _).
     destruct t as [ l ].

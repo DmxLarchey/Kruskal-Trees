@@ -4,7 +4,7 @@
 (*                             [*] Affiliation LORIA -- CNRS  *)
 (**************************************************************)
 (*      This file is distributed under the terms of the       *)
-(*         CeCILL B FREE SOFTWARE LICENSE AGREEMENT           *)
+(*        Mozilla Public License Version 2.0, MPL-2.0         *)
 (**************************************************************)
 
 From Coq
@@ -100,7 +100,7 @@ Section ltree.
 
       (** The Acc based recursor is proof-irrelevant *)
 
-      Let Fixpoint ltree_Acc_rect_eq t a a' : ltree_Acc_rect t a = ltree_Acc_rect t a'.
+      Local Fixpoint ltree_Acc_rect_eq t a a' : ltree_Acc_rect t a = ltree_Acc_rect t a'.
       Proof.
         destruct a; destruct a'; destruct t; simpl.
         apply HP_ext.
