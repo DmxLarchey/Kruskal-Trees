@@ -5,7 +5,7 @@
 (*                             [*] Affiliation LORIA -- CNRS  *)
 (**************************************************************)
 (*      This file is distributed under the terms of the       *)
-(*         CeCILL B FREE SOFTWARE LICENSE AGREEMENT           *)
+(*        Mozilla Public License Version 2.0, MPL-2.0         *)
 (**************************************************************)
 ```
 [comment]: # ( ∀ → ∃ ⋀ ⋁ ⇒ )
@@ -19,8 +19,8 @@ trees.
 
 It is was extracted from a complete rework of the proof of Kruskal's
 tree theorem based on dependent vectors instead of lists, but can be
-used independently under the [_CeCILL-B free software license_](http://www.cecill.info/licences.en.html) 
-(compatible with BSD), as requested by eg [@jjhugues](https://github.com/jjhugues).
+used independently under the _Mozilla Public License_ [MPL-2.0](LICENSE), 
+as initially requested by eg [@jjhugues](https://github.com/jjhugues).
 
 This `README` file provides a simple introduction to the main definitions.
 
