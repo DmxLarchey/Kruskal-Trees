@@ -61,11 +61,54 @@ Section Forall2.
     + intros []; constructor; auto.
   Qed.
 
-  Local Fact Forall2_rev_rec P l m : Forall2 P l m -> Forall2 P (rev l) (rev m).
+  Fact Forall2_nil_inv_l P m : Forall2 P [] m <-> m = [].
   Proof.
-    induction 1; simpl; auto.
-    apply Forall2_app; simpl; auto.
+    split.
+    + now inversion 1.
+    + intros ->; auto.
   Qed.
+
+  Fact Forall2_nil_inv_r P l : Forall2 P l [] <-> l = [].
+  Proof.
+    split.
+    + now inversion 1.
+    + intros ->; auto.
+  Qed.
+
+  Fact Forall2_cons_inv_l P x l m : Forall2 P (x::l) m <-> exists y m', P x y /\ Forall2 P l m' /\ m = y::m'.
+  Proof.
+    split.
+    + destruct l; inversion 1; eauto.
+    + intros (? & ? & ? & ? & ->); eauto.
+  Qed.
+
+  Fact Forall2_cons_inv_r P l y m : Forall2 P l (y::m) <-> exists x l', P x y /\ Forall2 P l' m /\ l = x::l'.
+  Proof.
+    split.
+    + destruct l; inversion 1; eauto.
+    + intros (? & ? & ? & ? & ->); eauto.
+  Qed.
+
+   (** Forall2_app_inv_{l,r} already appears in stdlib since Coq 8.13 *)
+
+  Hint Resolve Forall2_app : core.
+
+  Fact Forall2_snoc_inv_l P l x m : Forall2 P (l++[x]) m <-> exists m' y, Forall2 P l m' /\ P x y /\ m = m'++[y].
+  Proof.
+    split.
+    + intros (? & ? & ? & (? & ? & ? & ->%Forall2_nil_inv_l & ->)%Forall2_cons_inv_l & ->)%Forall2_app_inv_l; eauto.
+    + intros (? & ? & ? & ? & ->); eauto.
+  Qed.
+
+  Fact Forall2_snoc_inv_r P l m y : Forall2 P l (m++[y]) <-> exists l' x, Forall2 P l' m /\ P x y /\ l = l'++[x].
+  Proof.
+    split.
+    + intros (? & ? & ? & (? & ? & ? & ->%Forall2_nil_inv_r & ->)%Forall2_cons_inv_r & ->)%Forall2_app_inv_r; eauto.
+    + intros (? & ? & ? & ? & ->); eauto.
+  Qed.
+
+  Local Fact Forall2_rev_rec P l m : Forall2 P l m -> Forall2 P (rev l) (rev m).
+  Proof. induction 1; simpl; auto. Qed.
 
   Fact Forall2_rev P l m : Forall2 P (rev l) (rev m) <-> Forall2 P l m.
   Proof.
