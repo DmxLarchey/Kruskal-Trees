@@ -40,4 +40,11 @@ Definition lt_0_Sn n : 0 < S n.                             Proof. lia. Qed.
 Definition lt_n_S n m : n < m -> S n < S m.                 Proof. lia. Qed.
 Definition lt_S_n n m : S n < S m -> n < m.                 Proof. lia. Qed.
 
+(** map_length is marked deprecated in Coq 8.20 and has been renamed length_map *)
+
+Definition length_map (A B : Type) (f : A -> B) l : ⌊map f l⌋ = ⌊l⌋.
+Proof. induction l; simpl; f_equal; auto. Qed.
+
+Definition map_length := length_map.
+
 

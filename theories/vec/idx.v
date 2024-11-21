@@ -34,9 +34,11 @@ Notation 𝕊 := idx_nxt.
 Section idx_rect.
 
   (* This comes from an original idea of JF Monin
-     on Smaller inversions, submitted TYPES 2022 *)
+     on Smaller inversions (TYPES 2022) *)
 
-  Inductive idx_shape_O : idx 0 → Type := .
+  (* In Set to force not being automatically 
+     transfered from Type to Prop *)
+  Inductive idx_shape_O : idx 0 → Set := .
 
   Inductive idx_shape_S {n} : idx (S n) → Type :=
     | idx_shape_S_fst : idx_shape_S 𝕆
@@ -44,14 +46,14 @@ Section idx_rect.
 
   Let idx_invert_t n : idx n → Type :=
     match n with
-      | O   => idx_shape_O
-      | S n => idx_shape_S
+    | O   => idx_shape_O
+    | S n => idx_shape_S
     end.
 
   Definition idx_invert {n} (i : idx n) : idx_invert_t i :=
     match i with
-      | 𝕆   => idx_shape_S_fst
-      | 𝕊 i => idx_shape_S_nxt i
+    | 𝕆   => idx_shape_S_fst
+    | 𝕊 i => idx_shape_S_nxt i
     end.
 
   Definition idx_O_rect X (i : idx 0) : X :=

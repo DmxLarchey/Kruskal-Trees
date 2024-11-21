@@ -45,22 +45,22 @@ Section vec_invert.
       Following Smaller inversions by JF Monin (TYPES 2022)
     *)
 
-  Inductive vec_shape_O : vec X 0 -> Type :=
+  Inductive vec_shape_O : vec X 0 → Set :=
     | vec_shape_O_nil : vec_shape_O ∅.
 
-  Inductive vec_shape_S {n} : vec X (S n) -> Type :=
+  Inductive vec_shape_S {n} : vec X (S n) → Type :=
     | vec_shape_S_cons x v : vec_shape_S (x##v).
 
-  Definition vec_invert_t {n} : vec X n -> Type :=
+  Definition vec_invert_t {n} : vec X n → Type :=
     match n with
-      | 0   => vec_shape_O
-      | S n => vec_shape_S
+    | 0   => vec_shape_O
+    | S n => vec_shape_S
     end.
 
   Definition vec_invert {n} v : @vec_invert_t n v :=
     match v return vec_invert_t v with
-      | ∅    => vec_shape_O_nil
-      | x##v => vec_shape_S_cons x v
+    | ∅    => vec_shape_O_nil
+    | x##v => vec_shape_S_cons x v
     end.
 
   Definition vec_head n (v : vec X (S n)) :=
@@ -70,7 +70,7 @@ Section vec_invert.
 
   Definition vec_tail n (v : vec X (S n)) :=
     match vec_invert v with
-      | vec_shape_S_cons _ w => w
+    | vec_shape_S_cons _ w => w
     end.
 
   Fact vec_head_tail n (v : vec X (S n)) : v = vec_head v##vec_tail v.
@@ -104,8 +104,8 @@ Section vec_in.
   Fact vec_in_inv x n (v : vec _ n) :
          x ∈ᵥ v
        → match v with
-           | ∅    => False
-           | y##v => x = y \/ x ∈ᵥ v
+         | ∅    => False
+         | y##v => x = y \/ x ∈ᵥ v
          end.
   Proof. induction 1; auto. Qed.
 
@@ -133,19 +133,19 @@ Section vec_prj.
   Variable (X : Type).
 
   (** A nice implementation is *critical* here when using nested defs
-      Notice that pos_O_rect is implemented with
+      Notice that idx_O_rect is implemented with
 
                    match _ : Empty_set with end
 
-      which allows vec_pos v p to be recognized as a sub-term of v *)
+      which allows vec_prj v p to be recognized as a sub-term of v *)
 
   Fixpoint vec_prj n (v : vec _ n) : idx n → X :=
     match v with
-      | ∅    => idx_O_rect _
-      | x##v => λ i,
+    | ∅    => idx_O_rect _
+    | x##v => λ i,
       match idx_S_inv i with
-        | None   => x
-        | Some j => v⦃j⦄
+      | None   => x
+      | Some j => v⦃j⦄
       end
     end
   where "v ⦃ i ⦄" := (@vec_prj _ v i).
@@ -452,9 +452,9 @@ End vec_reif.
 
 Tactic Notation "vec" "reif" hyp(H) "as" simple_intropattern(P) :=
   match type of H with
-    | ∀_ : idx _, ex _ => apply vec_reif in H as P
-    | ∀_ : idx _, sig _ => apply vec_reif_t in H as P
-    | ∀_ : idx _, sigT _ => apply vec_reif_tt in H as P
+  | ∀_ : idx _, ex _ => apply vec_reif in H as P
+  | ∀_ : idx _, sig _ => apply vec_reif_t in H as P
+  | ∀_ : idx _, sigT _ => apply vec_reif_tt in H as P
   end.
 
 Section vec_cond_reif.
