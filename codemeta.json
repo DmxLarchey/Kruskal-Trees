@@ -1,0 +1,44 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "type": "SoftwareSourceCode",
+    "author": [
+        {
+            "id": "https://orcid.org/0000-0001-9860-7203",
+            "type": "Person",
+            "affiliation": {
+                "type": "Organization",
+                "name": "Departement of Formal Method, TYPES team, LORIA, CNRS"
+            },
+            "email": "dominique.larchey-Wendling@loria.fr",
+            "familyName": "Larchey-Wendling",
+            "givenName": "Dominique"
+        }
+    ],
+    "codeRepository": "git+https://github.com/DmxLarchey/Kruskal-Trees.git",
+    "dateCreated": "2022-11-01",
+    "dateModified": "2024-11-21",
+    "datePublished": "2022-11-08",
+    "description": "This Coq library formalizes in Coq 8.14+ the notion of rose tree via purely inductive characterizations and provides implementations of proper (nested) induction principles and tools to manipulate those trees.",
+    "funder": {
+        "type": "Organization",
+        "name": "CNRS"
+    },
+    "isPartOf": "https://github.com/DmxLarchey/Coq-Kruskal",
+    "keywords": [
+        "coq",
+        "rose trees",
+        "dependent types",
+        "Kruskal tree theorem"
+    ],
+    "license": "https://spdx.org/licenses/MPL-2.0",
+    "name": "Kruskal-Trees",
+    "operatingSystem": [
+        "Linux",
+        "MacOS"
+    ],
+    "programmingLanguage": "Coq",
+    "softwareRequirements": "opam, ocaml",
+    "version": "1.5",
+    "developmentStatus": "active",
+    "issueTracker": "https://github.com/DmxLarchey/Kruskal-Trees/issues"
+}
