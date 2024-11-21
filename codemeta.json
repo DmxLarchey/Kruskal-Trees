@@ -19,6 +19,7 @@
     "dateModified": "2024-11-21",
     "datePublished": "2022-11-08",
     "description": "This Coq library formalizes in Coq 8.14+ the notion of rose tree via purely inductive characterizations and provides implementations of proper (nested) induction principles and tools to manipulate those trees.",
+    "downloadUrl": "https://github.com/DmxLarchey/Kruskal-Trees/archive/refs/tags/1.5.tar.gz",
     "funder": {
         "type": "Organization",
         "name": "CNRS"
