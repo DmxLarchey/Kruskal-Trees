@@ -31,8 +31,10 @@ Ltac rsplit n :=
 
 (* with a goal ..., H : A, ... |- B, replace it with ... |- A = B *)
 
+(*
 Ltac replace_with H :=
   match goal with [ G : ?h |- ?c ] => match H with G => cutrewrite (c = h); [ exact H | f_equal ] end end.
+*)
 
 Tactic Notation "eq" "goal" hyp(H) :=
   match goal with
