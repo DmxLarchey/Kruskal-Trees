@@ -12,6 +12,9 @@
 
 # What is this library?
 
+This sub-project is part of the larger project `Coq-Kruskal`
+described here: https://github.com/DmxLarchey/Coq-Kruskal.
+
 This library formalizes in `Coq 8.14+` the notion of _rose tree_
 via purely inductive characterizations and provides implementations of
 proper (nested) induction principles and tools to manipulate those
