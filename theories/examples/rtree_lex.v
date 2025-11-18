@@ -15,7 +15,7 @@
    and show that it is a (strongly) total strict order on those trees, but
    however it is NOT well-founded as we expose a strictly decreasing sequence *)
 
-From Coq
+From Stdlib
   Require Import Arith List Lia Wellfounded Utf8.
 
 From KruskalTrees

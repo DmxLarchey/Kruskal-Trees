@@ -7,7 +7,7 @@
 (*        Mozilla Public License Version 2.0, MPL-2.0         *)
 (**************************************************************)
 
-From Coq
+From Stdlib
   Require Import List Arith Fin Utf8.
 
 From KruskalTrees

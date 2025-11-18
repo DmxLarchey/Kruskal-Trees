@@ -7,10 +7,10 @@
 (*        Mozilla Public License Version 2.0, MPL-2.0         *)
 (**************************************************************)
 
-From Coq
+From Stdlib
   Require Import Arith List Lia Eqdep_dec Utf8.
 
-From Coq
+From Stdlib
   Require Vector.
 
 From KruskalTrees
