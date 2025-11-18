@@ -21,7 +21,7 @@ install: [
 ]
 
 depends: [
-  "rocq" {>= "9.0.0" & < "9.2~"}
+  "rocq-core" {>= "9.0.0" & < "9.2~"}
   "rocq-stdlib" {}
 ]
 
