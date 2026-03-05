@@ -8,7 +8,7 @@
 (**************************************************************)
 
 From Stdlib
-  Require Import List Arith.
+  Require Import List Arith Utf8.
 
 From KruskalTrees
   Require Import notations.
@@ -17,8 +17,8 @@ Import ListNotations.
 
 Set Implicit Arguments.
 
-Fact Forall_cons_inv X (P : X -> Prop) (x : X) l : 
-       Forall P (x::l) <-> P x /\ Forall P l.
+Fact Forall_cons_inv X (P : X → Prop) (x : X) l : 
+  Forall P (x::l) ↔ P x ∧ Forall P l.
 Proof.
   split.
   + inversion 1; eauto.
@@ -32,7 +32,7 @@ Section Forall2.
 
   Variables (X Y : Type).
 
-  Implicit Types (P Q : X -> Y -> Prop).
+  Implicit Types (P Q : X → Y → Prop).
 
   (** A explicit term here is better for nested fixpoints like ltree_product_embed_ind in tree/ltree.v *)
 
@@ -43,49 +43,50 @@ Section Forall2.
         | Forall2_cons H1 H2 => Forall2_cons (HPQ _ _ H1) (loop _ _ H2)
       end.
 
-  Fact Forall2_length P l m : Forall2 P l m -> ⌊l⌋ = ⌊m⌋.
+  Fact Forall2_length P l m : Forall2 P l m → ⌊l⌋ = ⌊m⌋.
   Proof. induction 1; simpl; auto. Qed.
 
   Fact Forall2_in_left_inv P l m :
-       Forall2 P l m -> forall x, x ∈ l -> exists y, y ∈ m /\ P x y.
+    Forall2 P l m → ∀x, x ∈ l → ∃y, y ∈ m ∧ P x y.
   Proof.
-    induction 1 as [ | x y l m H1 H2 IH2 ]; simpl; try tauto.
-    intros z [ <- | Hz ]; eauto.
-    apply IH2 in Hz as (k & ? & ?); eauto.
+    induction 1 as [ | ? ? ? ? ? ? IH ]; simpl; try tauto.
+    intros ? [ <- | (? & [])%IH ]; eauto.
   Qed.
 
-  Fact Forall2_cons_inv P x l y m : Forall2 P (x::l) (y::m) <-> P x y /\ Forall2 P l m.
+  Fact Forall2_cons_inv P x l y m : Forall2 P (x::l) (y::m) ↔ P x y ∧ Forall2 P l m.
   Proof.
     split.
     + inversion 1; tauto.
     + intros []; constructor; auto.
   Qed.
 
-  Fact Forall2_nil_inv_l P m : Forall2 P [] m <-> m = [].
+  Fact Forall2_nil_inv_l P m : Forall2 P [] m ↔ m = [].
   Proof.
     split.
     + now inversion 1.
     + intros ->; auto.
   Qed.
 
-  Fact Forall2_nil_inv_r P l : Forall2 P l [] <-> l = [].
+  Fact Forall2_nil_inv_r P l : Forall2 P l [] ↔ l = [].
   Proof.
     split.
     + now inversion 1.
     + intros ->; auto.
   Qed.
 
-  Fact Forall2_cons_inv_l P x l m : Forall2 P (x::l) m <-> exists y m', P x y /\ Forall2 P l m' /\ m = y::m'.
+  Fact Forall2_cons_inv_l P x l m :
+    Forall2 P (x::l) m ↔ ∃ y m', P x y ∧ Forall2 P l m' ∧ m = y::m'.
   Proof.
     split.
-    + destruct l; inversion 1; eauto.
+    + inversion 1; eauto.
     + intros (? & ? & ? & ? & ->); eauto.
   Qed.
 
-  Fact Forall2_cons_inv_r P l y m : Forall2 P l (y::m) <-> exists x l', P x y /\ Forall2 P l' m /\ l = x::l'.
+  Fact Forall2_cons_inv_r P l y m :
+    Forall2 P l (y::m) ↔ ∃ x l', P x y ∧ Forall2 P l' m ∧ l = x::l'.
   Proof.
     split.
-    + destruct l; inversion 1; eauto.
+    + inversion 1; eauto.
     + intros (? & ? & ? & ? & ->); eauto.
   Qed.
 
@@ -93,24 +94,26 @@ Section Forall2.
 
   Hint Resolve Forall2_app : core.
 
-  Fact Forall2_snoc_inv_l P l x m : Forall2 P (l++[x]) m <-> exists m' y, Forall2 P l m' /\ P x y /\ m = m'++[y].
+  Fact Forall2_snoc_inv_l P l x m :
+    Forall2 P (l++[x]) m ↔ ∃ m' y, Forall2 P l m' ∧ P x y ∧ m = m'++[y].
   Proof.
     split.
     + intros (? & ? & ? & (? & ? & ? & ->%Forall2_nil_inv_l & ->)%Forall2_cons_inv_l & ->)%Forall2_app_inv_l; eauto.
     + intros (? & ? & ? & ? & ->); eauto.
   Qed.
 
-  Fact Forall2_snoc_inv_r P l m y : Forall2 P l (m++[y]) <-> exists l' x, Forall2 P l' m /\ P x y /\ l = l'++[x].
+  Fact Forall2_snoc_inv_r P l m y :
+    Forall2 P l (m++[y]) ↔ ∃ l' x, Forall2 P l' m ∧ P x y ∧ l = l'++[x].
   Proof.
     split.
     + intros (? & ? & ? & (? & ? & ? & ->%Forall2_nil_inv_r & ->)%Forall2_cons_inv_r & ->)%Forall2_app_inv_r; eauto.
     + intros (? & ? & ? & ? & ->); eauto.
   Qed.
 
-  Local Fact Forall2_rev_rec P l m : Forall2 P l m -> Forall2 P (rev l) (rev m).
+  Local Fact Forall2_rev_rec P l m : Forall2 P l m → Forall2 P (rev l) (rev m).
   Proof. induction 1; simpl; auto. Qed.
 
-  Fact Forall2_rev P l m : Forall2 P (rev l) (rev m) <-> Forall2 P l m.
+  Fact Forall2_rev P l m : Forall2 P (rev l) (rev m) ↔ Forall2 P l m.
   Proof.
     split.
     + intros H; apply Forall2_rev_rec in H; revert H.
@@ -118,45 +121,42 @@ Section Forall2.
     + apply Forall2_rev_rec.
   Qed.
 
+  Fact Forall2_conj P Q l m : Forall2 (P∩₂Q) l m ↔ Forall2 P l m ∧ Forall2 Q l m.
+  Proof.
+    split.
+    + induction 1; split; constructor; tauto.
+    + intros (H1 & H2); revert H1 H2.
+      induction 1; inversion 1; auto.
+  Qed.
+
+  Fact Forall2_xchg P l m : Forall2 P l m ↔ Forall2 (λ x y, P y x) m l.
+  Proof. split; induction 1; auto. Qed.
+
 End Forall2.
 
-Fact Forall2_Forall X (R : X -> X -> Prop) l :
-      Forall2 R l l <-> Forall (fun x => R x x) l.
+Fact Forall2_in_right_inv X Y (P :  X → Y → Prop)  l m :
+  Forall2 P l m → ∀y, y ∈ m → ∃x, x ∈ l ∧ P x y.
+Proof.
+  rewrite Forall2_xchg; intros H y Hy.
+  now apply Forall2_in_left_inv with (2 := Hy) in H.
+Qed.
+
+Fact Forall2_Forall X (R : X → X → Prop) l : Forall2 R l l ↔ Forall (λ x, R x x) l.
 Proof.
   induction l.
   + split; constructor.
   + rewrite Forall2_cons_inv, Forall_cons_inv; tauto.
 Qed.
 
-Fact Forall2_conj X Y (R T : X -> Y -> Prop) l m :
-      Forall2 (R∩₂T) l m <-> Forall2 R l m /\ Forall2 T l m.
-Proof.
-  split.
-  + induction 1; split; constructor; tauto.
-  + intros (H1 & H2); revert H1 H2.
-    induction 1; inversion 1; auto.
-Qed.
-
-Fact Forall2_xchg X Y (R : X -> Y -> Prop) l m :
-      Forall2 R l m <-> Forall2 (fun x y => R y x) m l.
-Proof. split; induction 1; auto. Qed.
-
-Fact Forall2_in_right_inv X Y (P : X -> Y -> Prop) l m :
-      Forall2 P l m -> forall y, y ∈ m -> exists x, x ∈ l /\ P x y.
-Proof.
-  rewrite Forall2_xchg; intros H y Hy.
-  now apply Forall2_in_left_inv with (2 := Hy) in H.
-Qed.
-
-Fact Forall2_eq X l m : Forall2 (@eq X) l m <-> l = m.
+Fact Forall2_eq X l m : Forall2 (@eq X) l m ↔ l = m.
 Proof.
   split.
   + induction 1; subst; auto.
   + intros []; induction l; simpl; auto.
 Qed.
 
-Fact Forall2_map_right X Y Z (R : X -> Z -> Prop) (f : Y -> Z) l m :
-      Forall2 R l (map f m) <-> Forall2 (fun x y => R x (f y)) l m.
+Fact Forall2_map_right X Y Z (R : X → Z → Prop) (f : Y → Z) l m :
+  Forall2 R l (map f m) ↔ Forall2 (λ x y, R x (f y)) l m.
 Proof.
   split.
   + revert m; induction l as [ | x l IHl ]; intros [ | y m ]; intros H; try (inversion H; fail); auto.
@@ -164,25 +164,23 @@ Proof.
   + induction 1; simpl; auto.
 Qed.
 
-Fact Forall2_map_left X Y Z (R : Y -> Z -> Prop) (f : X -> Y) l m :
-      Forall2 R (map f l) m <-> Forall2 (fun x z => R (f x) z) l m.
+Fact Forall2_map_left X Y Z (R : Y → Z → Prop) (f : X → Y) l m :
+  Forall2 R (map f l) m ↔ Forall2 (λ x z, R (f x) z) l m.
 Proof. rewrite Forall2_xchg, Forall2_map_right, Forall2_xchg; tauto. Qed.
 
-Fact Forall2_comp X Y Z (P : X -> Y -> Prop) (Q : Y -> Z -> Prop) l m k :
-      Forall2 P l m -> Forall2 Q m k -> Forall2 Q∘P l k.
+Fact Forall2_comp X Y Z (P : X → Y → Prop) (Q : Y → Z → Prop) l m k :
+  Forall2 P l m → Forall2 Q m k → Forall2 Q∘P l k.
 Proof.
   intros H; revert H k.
   induction 1; auto; inversion 1; subst; eauto.
 Qed.
 
-Fact Forall2_equiv X Y (R T : X -> Y -> Prop) l m :
-       (forall x y, R x y <-> T x y)
-    -> Forall2 R l m <-> Forall2 T l m.
+Fact Forall2_equiv X Y (R T : X → Y → Prop) l m :
+  (∀ x y, R x y ↔ T x y) → Forall2 R l m ↔ Forall2 T l m.
 Proof. intros E; split; apply Forall2_mono; intros ? ?; apply E. Qed.
 
-Fact forall_ex_Forall2 X Y (R : X -> Y -> Prop) l :
-       (forall x, x ∈ l -> ex (R x))
-    -> ex (Forall2 R l).
+Fact forall_ex_Forall2 X Y (R : X → Y → Prop) l :
+  (∀x, x ∈ l → ex (R x)) → ex (Forall2 R l).
 Proof.
   induction l as [ | x l IHl ]; intros Hl.
   + exists nil; auto.
@@ -192,12 +190,12 @@ Proof.
     * exists (y::m); auto.
 Qed.
 
-Fact Forall2_Forall_left X Y (P : Y -> Prop) l m :
-      Forall2 (fun _ : X => P) l m -> Forall P m.
+Fact Forall2_Forall_left X Y (P : Y → Prop) l m :
+  Forall2 (λ _ : X, P) l m → Forall P m.
 Proof. induction 1; eauto. Qed.
 
-Fact forall_sig_Forall2 X Y (R : X -> Y -> Prop) l :
-      (forall x, x ∈ l -> sig (R x)) -> sig (Forall2 R l).
+Fact forall_sig_Forall2 X Y (R : X → Y → Prop) l :
+  (∀x, x ∈ l → sig (R x)) → sig (Forall2 R l).
 Proof.
   induction l as [ | x l IHl ]; intros Hl.
   + exists nil; auto.
@@ -207,28 +205,29 @@ Proof.
     * exists (y::m); auto.
 Qed.
 
-Fact forall_sigT_Forall2 X Y (R : X -> Y -> Prop) l :
-      (forall x, x ∈ l -> sigT (R x)) -> sig (Forall2 R l).
+Fact forall_sigT_Forall2 X Y (R : X → Y → Prop) l :
+  (∀x, x ∈ l → sigT (R x)) → sig (Forall2 R l).
 Proof.
   intros H; apply forall_sig_Forall2.
   intros x Hx; destruct (H _ Hx); eauto.
 Qed.
 
-Fact Forall_sig X (P : X -> Prop) l :
-      Forall P l -> { m : list (sig P) | l = map (@proj1_sig _ _) m }.
+Fact Forall_map_proj1_sig X (P : X → Prop) l : Forall P (map (@proj1_sig _ P) l).
+Proof. induction l as [ | [] ]; simpl; eauto. Qed.
+
+Fact Forall_sig X (P : X → Prop) l :
+  Forall P l → { m : list (sig P) | l = map (@proj1_sig _ _) m }.
 Proof.
   induction l as [ | x l IHl ].
   + exists nil; auto.
-  + intros H.
-    destruct IHl as (m & Hm).
-    * inversion H; auto.
-    * apply Forall_cons_inv in H as [ Hx ? ].
-      exists (exist _ x Hx::m); subst; auto.
+  + intros (Hx & Hl)%Forall_cons_inv.
+    destruct IHl as (m & ->); auto.
+    exists (exist _ x Hx::m); auto.
 Qed.
 
 Tactic Notation "Forall" "reif" hyp(H) "as" simple_intropattern(P) :=
   match type of H with
-    | forall _, _ ∈ _ -> ex _ => apply forall_ex_Forall2 in H as P
-    | forall _, _ ∈ _ -> sig _ => apply forall_sig_Forall2 in H as P
-    | forall _, _ ∈ _ -> sigT _ => apply forall_sigT_Forall2 in H as P
+    | ∀_, _ ∈ _ → ex _   => apply forall_ex_Forall2 in H as P
+    | ∀_, _ ∈ _ → sig _  => apply forall_sig_Forall2 in H as P
+    | ∀_, _ ∈ _ → sigT _ => apply forall_sigT_Forall2 in H as P
   end.
