@@ -7,6 +7,7 @@
 (*        Mozilla Public License Version 2.0, MPL-2.0         *)
 (**************************************************************)
 
+#[warning="-warn-library-file-stdlib-vector"]
 From Stdlib
   Require Import List Arith Fin Utf8.
 
@@ -22,12 +23,12 @@ Set Implicit Arguments.
 (** We use the type Fin.t of the standard library but
     with another name and our own tools *)
 
-Notation idx := t.
-Notation idx_fst := F1.
-Notation idx_nxt := FS.
+Abbreviation idx := t.
+Abbreviation idx_fst := F1.
+Abbreviation idx_nxt := FS.
 
-Notation 𝕆 := idx_fst.
-Notation 𝕊 := idx_nxt.
+Abbreviation 𝕆 := idx_fst.
+Abbreviation 𝕊 := idx_nxt.
 
 (* 𝕆𝕊 ∀ → *)
 
@@ -89,9 +90,9 @@ Tactic Notation "idx" "invert" "all" :=
 
 Module idx_notations.
 
-  Notation idx₀ := 𝕆 (only parsing).
-  Notation idx₁ := (𝕊 idx₀) (only parsing).
-  Notation idx₂ := (𝕊 idx₁) (only parsing).
+  Abbreviation idx₀ := 𝕆 (only parsing).
+  Abbreviation idx₁ := (𝕊 idx₀) (only parsing).
+  Abbreviation idx₂ := (𝕊 idx₁) (only parsing).
 
   Tactic Notation "invert" "idx" hyp(i) := idx invert i.
 

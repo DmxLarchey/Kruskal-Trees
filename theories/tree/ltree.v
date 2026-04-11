@@ -123,6 +123,10 @@ Section ltree.
   Definition ltree_rec (P : _ -> Set) := ltree_rect P.
   Definition ltree_ind (P : _ -> Prop) := ltree_rect P.
 
+  #[global] Register Scheme ltree_rect as rect_dep for ltree.
+  #[global] Register Scheme ltree_rec as rec_dep for ltree.
+  #[global] Register Scheme ltree_ind as ind_dep for ltree.
+
   Section ltree_eq_dec.
 
     (** As an application of ltree_rect, the discreteness of

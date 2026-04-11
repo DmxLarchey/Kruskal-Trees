@@ -18,7 +18,7 @@ Import idx_notations vec_notations dtree_notations.
 Set Implicit Arguments.
 
 (** vectors tree with uniform type for nodes *)
-Notation vtree := (fun X => dtree (fun _ => X)).
+Abbreviation vtree X := (dtree (fun _ => X)).
 
 Module vtree_notations.
 

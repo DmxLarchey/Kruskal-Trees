@@ -59,6 +59,10 @@ End rtree_rect.
 Definition rtree_rec (P : _ -> Set) := @rtree_rect P.
 Definition rtree_ind (P : _ -> Prop) := @rtree_rect P.
 
+#[global] Register Scheme rtree_rect as rect_dep for rtree.
+#[global] Register Scheme rtree_rec as rec_dep for rtree.
+#[global] Register Scheme rtree_ind as ind_dep for rtree.
+
 Fixpoint rtree_size (r : rtree) : nat.
 Proof.
   destruct r as [ l ].

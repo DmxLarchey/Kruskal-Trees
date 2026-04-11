@@ -10,6 +10,7 @@
 From Stdlib
   Require Import Arith List Lia Eqdep_dec Utf8.
 
+#[warning="-warn-library-file-stdlib-vector"]
 From Stdlib
   Require Vector.
 
@@ -25,9 +26,9 @@ Import idx_notations.
 #[local] Reserved Notation "x '∈ᵥ' v" (at level 70, format "x  ∈ᵥ  v").
 #[local] Reserved Notation "'⦑' i ',' v '⦒'"  (at level 0, format "⦑ i , v ⦒").
 
-Notation vec := Vector.t.
-Notation vec_nil := Vector.nil.
-Notation vec_cons := Vector.cons.
+Abbreviation vec := Vector.t.
+Abbreviation vec_nil := Vector.nil.
+Abbreviation vec_cons := Vector.cons.
 
 Arguments vec_nil {A}.
 Arguments vec_cons {A} _ {n}.
@@ -36,6 +37,7 @@ Arguments vec_cons {A} _ {n}.
 #[local] Infix "##" := vec_cons.
 
 Create HintDb vec_db.
+Create Rewrite HintDb vec_db.
 
 Section vec_invert.
 

@@ -79,6 +79,10 @@ Section dtree.
   Definition dtree_rec (P : _ -> Set) := dtree_rect P.
   Definition dtree_ind (P : _ -> Prop) := dtree_rect P.
 
+  #[global] Register Scheme dtree_rect as rect_dep for dtree.
+  #[global] Register Scheme dtree_rec as rec_dep for dtree.
+  #[global] Register Scheme dtree_ind as ind_dep for dtree.
+
   Definition dtree_fall (P : forall k, X k -> vec dtree k -> Prop) : dtree -> Prop.
   Proof.
     induction 1 as [ k x v IH ].
