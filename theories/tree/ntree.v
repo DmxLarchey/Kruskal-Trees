@@ -16,8 +16,6 @@ Set Implicit Arguments.
 
 #[local] Reserved Notation "'⌊' t '⌋ₙ'" (at level 0, t at level 200, format "⌊ t ⌋ₙ").
 
-Unset Elimination Schemes.
-
 (* Finitely branching trees labeled in idx n ~~ {1,...,n} *)
 
 Definition ntree n := ltree (idx n).

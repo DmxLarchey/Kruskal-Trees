@@ -40,4 +40,7 @@ Section btree.
 
   Definition btree_ind (P : _ -> Prop) := btree_rect P.
 
+  #[global] Register Scheme btree_rect as rect_dep for btree.
+  #[global] Register Scheme btree_ind as ind_dep for btree.
+
 End btree.
