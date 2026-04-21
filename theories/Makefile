@@ -17,7 +17,7 @@ whitespaces: force
 	find . -type f -name "*.v" -exec sed --in-place 's/[[:space:]]\+$$//' {} \+
 
 wc: force
-	coqwc `find -name "*.v"`
+	$(COQBIN)rocq wc `find -name "*.v"`
 
 %: Makefile.rocq force
 	@+$(MAKE) -f Makefile.rocq $@
